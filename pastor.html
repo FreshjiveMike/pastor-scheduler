@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Book with Dr. Gorveatte</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-6">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="text-2xl font-semibold mb-4">Available Slots</h1>
+    <div id="slots" class="space-y-4"></div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw73cGY-TGiQ5Os0svNPPgn1xLOdRyJI68S07mwuFq4-5qiYGfmRSp9yeOIcqzHtKB_LA/exec';
+
+    async function loadSlots() {
+      const res = await fetch(SCRIPT_URL);
+      const slots = await res.json();
+      const container = document.getElementById('slots');
+      container.innerHTML = '';
+      slots.forEach(s => {
+        const start = new Date(s.start);
+        const end   = new Date(s.end);
+        const div = document.createElement('div');
+        div.className = 'bg-white p-4 rounded shadow';
+        div.innerHTML = `
+          <strong>${s.region}</strong><br>
+          ${start.toLocaleDateString()} 
+          ${start.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+           – 
+          ${end.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+          <button data-id="${s.id}" class="ml-4 px-3 py-1 bg-indigo-600 text-white rounded">Book</button>
+        `;
+        container.appendChild(div);
+      });
+      // attach book handlers
+      document.querySelectorAll('button[data-id]').forEach(btn => {
+        btn.onclick = () => showForm(btn.dataset.id);
+      });
+    }
+
+    function showForm(slotId) {
+      const name      = prompt('Your name:');
+      if (!name) return;
+      const church    = prompt('Your church:');
+      const email     = prompt('Your email:');
+      const meetingType = prompt('Type ("Annual Coaching" or "Check-In")', 'Annual Coaching');
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ slotId, name, church, email, meetingType }),
+      })
+        .then(r => r.json())
+        .then(j => {
+          if (j.status === 'booked') {
+            alert('Booked! Check your email for confirmation.');
+            loadSlots();
+          } else {
+            alert('Failed to book slot.');
+          }
+        });
+    }
+
+    // initial load
+    loadSlots();
+  </script>
+</body>
+</html>
