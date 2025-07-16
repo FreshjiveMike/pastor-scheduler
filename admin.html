@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Admin – Pastor Scheduler</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-6">
+  <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-semibold mb-4">Add Availability Slot</h1>
+    <form id="availForm" class="space-y-4">
+      <div>
+        <label class="block text-sm">Region</label>
+        <select id="region" class="mt-1 block w-full rounded border-gray-300">
+          <option>Central IN</option>
+          <option>Southwest IN</option>
+          <option>Northwest IN</option>
+          <option>Northeast IN</option>
+          <option>Southeast IN</option>
+          <option>South Central IN</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm">Date</label>
+        <input id="date" type="date" class="mt-1 block w-full rounded border-gray-300" />
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm">Start Time</label>
+          <input id="startTime" type="time" class="mt-1 block w-full rounded border-gray-300" />
+        </div>
+        <div>
+          <label class="block text-sm">End Time</label>
+          <input id="endTime" type="time" class="mt-1 block w-full rounded border-gray-300" />
+        </div>
+      </div>
+      <button
+        type="submit"
+        class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
+      >Add Slot</button>
+      <p id="status" class="mt-2 text-sm text-center"></p>
+    </form>
+  </div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw73cGY-TGiQ5Os0svNPPgn1xLOdRyJI68S07mwuFq4-5qiYGfmRSp9yeOIcqzHtKB_LA/exec';
+    document.getElementById('availForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const region = document.getElementById('region').value;
+      const date = document.getElementById('date').value;
+      const start = new Date(`${date}T${document.getElementById('startTime').value}`).toISOString();
+      const end   = new Date(`${date}T${document.getElementById('endTime').value}`).toISOString();
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ region, start, end }),
+      });
+      const j = await res.json();
+      document.getElementById('status').textContent =
+        j.status === 'added' ? 'Slot added!' : 'Error adding slot';
+    });
+  </script>
+</body>
+</html>
