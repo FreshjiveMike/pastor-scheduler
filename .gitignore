@@ -1,0 +1,10 @@
+# Node / Next.js
+node_modules/
+.next/
+dist/
+
+# Environment
+.env.local
+
+# Database (if you’re using SQLite for demo)
+dev.db
